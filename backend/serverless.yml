@@ -46,5 +46,4 @@ functions:
       - http:
           path: market
           method: get
-          authorizer: aws_iam
           cors: true
