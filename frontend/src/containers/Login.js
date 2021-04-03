@@ -9,18 +9,14 @@ import { onError } from "../libs/errorLib";
 import "./Login.css";
 
 export default function Login() {
-  // Set up for the routing history. This allows you to change the route (aka the url in the searchbar)
   const history = useHistory();
-  // Retrieves authentication status from the AppContext Provider in App.js
   const { userHasAuthenticated } = useAppContext();
-
-  // Setup for using the custom useFormFields handler
+  const [isLoading, setIsLoading] = useState(false);
   const [fields, handleFieldChange] = useFormFields({
     email: "",
     password: ""
   });
 
-  // Validate that the form is filled in! Where can this be used?
   function validateForm() {
     return fields.email.length > 0 && fields.password.length > 0;
   }
@@ -28,19 +24,48 @@ export default function Login() {
   async function handleSubmit(event) {
     event.preventDefault();
 
-    try {
-      // handle auth!
+    setIsLoading(true);
 
-      // Sends the user to their profile
+    try {
+      await Auth.signIn(fields.email, fields.password);
+      userHasAuthenticated(true);
       history.push("/profile");
     } catch (e) {
       onError(e);
+      setIsLoading(false);
     }
   }
 
   return (
     <div className="Login">
-      Login form will be here!
+      <Form onSubmit={handleSubmit}>
+        <Form.Group size="lg" controlId="email">
+          <Form.Label>Email</Form.Label>
+          <Form.Control
+            autoFocus
+            type="email"
+            value={fields.email}
+            onChange={handleFieldChange}
+          />
+        </Form.Group>
+        <Form.Group size="lg" controlId="password">
+          <Form.Label>Password</Form.Label>
+          <Form.Control
+            type="password"
+            value={fields.password}
+            onChange={handleFieldChange}
+          />
+        </Form.Group>
+        <LoaderButton
+          block
+          size="lg"
+          type="submit"
+          isLoading={isLoading}
+          disabled={!validateForm()}
+        >
+          Login
+        </LoaderButton>
+      </Form>
     </div>
   );
 }

@@ -18,7 +18,7 @@ provider:
   # These environment variables are made available to our functions
   # under process.env.
   environment:
-    tableName: notes
+    TableName: watchlists
 
   # 'iamRoleStatements' defines the permission policy for the Lambda function.
   # In this case Lambda functions are granted with permissions to access DynamoDB.
@@ -46,4 +46,54 @@ functions:
       - http:
           path: market
           method: get
+          cors: true
+  remove-symbols:
+    handler: remove-symbols.main
+    events:
+      - http:
+          path: symbols
+          method: delete
+          authorizer: aws_iam
+          cors: true
+
+  add-symbols:
+    handler: add-symbols.main  
+    events:
+      - http:
+          path: symbols
+          method: post
+          authorizer: aws_iam
+          cors: true      
+          
+  create-watchlist:
+    handler: create-watchlist.main
+    events:
+      - http:
+          path: watchlist
+          method: post
+          authorizer: aws_iam
+          cors: true
+  delete-watchlist:
+    handler: delete-watchlist.main
+    events:
+      - http:
+          path: watchlist
+          method: delete
+          authorizer: aws_iam
+          cors: true
+  get-watchlists:
+    handler: get-watchlists.main
+    events:
+      - http:
+          path: watchlist/{id}
+          method: get
+          authorizer: aws_iam
+          cors: true
+  get-own-watchlists:
+    handler: get-watchlists.main
+    events:
+      - http:
+          path: watchlist
+          method: get
+          authorizer: aws_iam
           cors: true

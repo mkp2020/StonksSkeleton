@@ -1,0 +1,8 @@
+{
+    "body": "{\"symbols\":[\"F\",\"TSLA\"],\"watchlist\":\"TestList\"}",
+    "requestContext": {
+      "identity": {
+        "cognitoIdentityId": "TestUser1234"
+      }
+    }
+  }

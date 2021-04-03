@@ -6,6 +6,7 @@ const config = {
   },
   apiGateway: {
     REGION: "us-west-1",
+    //fill out config.js -- get the id
     URL: "https://oq2bdt52sb.execute-api.us-west-1.amazonaws.com/prod",
   },
   cognito: {

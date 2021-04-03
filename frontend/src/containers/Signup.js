@@ -10,21 +10,17 @@ import { onError } from "../libs/errorLib";
 import "./Signup.css";
 
 export default function Signup() {
-
-  // Setup for using the custom useFormFields handler
   const [fields, handleFieldChange] = useFormFields({
     email: "",
     password: "",
     confirmPassword: "",
     confirmationCode: "",
   });
-
   const history = useHistory();
-  
-  // This retrieves the userHasAuthenticated status from the AppContext Provider in App.js
+  const [newUser, setNewUser] = useState(null);
   const { userHasAuthenticated } = useAppContext();
+  const [isLoading, setIsLoading] = useState(false);
 
-  // Validation for an accurate form! Where can you use this?
   function validateForm() {
     return (
       fields.email.length > 0 &&
@@ -33,38 +29,117 @@ export default function Signup() {
     );
   }
 
-  // Validation for an accurate confirmation form! Where can you use this?
   function validateConfirmationForm() {
     return fields.confirmationCode.length > 0;
   }
 
   async function handleSubmit(event) {
     event.preventDefault();
-    
-    // Sign up logic!
+  
+    setIsLoading(true);
+  
+    try {
+      const newUser = await Auth.signUp({
+        username: fields.email,
+        password: fields.password,
+      });
+      setIsLoading(false);
+      setNewUser(newUser);
+    } catch (e) {
+      onError(e);
+      setIsLoading(false);
+    }
   }
   
   async function handleConfirmationSubmit(event) {
     event.preventDefault();
   
-    // Confirmation logic!
+    setIsLoading(true);
+  
+    try {
+      await Auth.confirmSignUp(fields.email, fields.confirmationCode);
+      await Auth.signIn(fields.email, fields.password);
+  
+      userHasAuthenticated(true);
+      history.push("/");
+    } catch (e) {
+      onError(e);
+      setIsLoading(false);
+    }
   }
 
   function renderConfirmationForm() {
     return (
-      <div>This will bethe confirmation formQ</div>
+      <Form onSubmit={handleConfirmationSubmit}>
+        <Form.Group controlId="confirmationCode" size="lg">
+          <Form.Label>Confirmation Code</Form.Label>
+          <Form.Control
+            autoFocus
+            type="tel"
+            onChange={handleFieldChange}
+            value={fields.confirmationCode}
+          />
+          <Form.Text muted>Please check your email for the code.</Form.Text>
+        </Form.Group>
+        <LoaderButton
+          block
+          size="lg"
+          type="submit"
+          variant="success"
+          isLoading={isLoading}
+          disabled={!validateConfirmationForm()}
+        >
+          Verify
+        </LoaderButton>
+      </Form>
     );
   }
 
   function renderForm() {
     return (
-      <div>There will be a form here!</div>
+      <Form onSubmit={handleSubmit}>
+        <Form.Group controlId="email" size="lg">
+          <Form.Label>Email</Form.Label>
+          <Form.Control
+            autoFocus
+            type="email"
+            value={fields.email}
+            onChange={handleFieldChange}
+          />
+        </Form.Group>
+        <Form.Group controlId="password" size="lg">
+          <Form.Label>Password</Form.Label>
+          <Form.Control
+            type="password"
+            value={fields.password}
+            onChange={handleFieldChange}
+          />
+        </Form.Group>
+        <Form.Group controlId="confirmPassword" size="lg">
+          <Form.Label>Confirm Password</Form.Label>
+          <Form.Control
+            type="password"
+            onChange={handleFieldChange}
+            value={fields.confirmPassword}
+          />
+        </Form.Group>
+        <LoaderButton
+          block
+          size="lg"
+          type="submit"
+          variant="success"
+          isLoading={isLoading}
+          disabled={!validateForm()}
+        >
+          Signup
+        </LoaderButton>
+      </Form>
     );
   }
 
   return (
-    <div className="">
-      This is where a sign up/confirm form will be!
+    <div className="Signup">
+      {newUser === null ? renderForm() : renderConfirmationForm()}
     </div>
   );
 }
